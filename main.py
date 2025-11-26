@@ -1,10 +1,11 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
 
-#-------------------------
+st.set_page_config(page_title="Regulatory Intelligence Feed", layout="wide")
+
+# -------------------------
 # Mock Data
-#-------------------------
+# -------------------------
 data = [
     {
         "agency": "FDA",
@@ -38,27 +39,24 @@ data = [
     },
 ]
 
-#-------------------------
-# Page Layout
-#-------------------------
-st.set_page_config(page_title="Regulatory Intelligence Feed", layout="wide")
-
+# -------------------------
+# UI Header
+# -------------------------
 st.title("📰 Regulatory Intelligence Feed")
-st.caption("Card-based intelligence UI – Prototype")
+st.subheader("Modern card-based UI mock")
 
-#-------------------------
+# -------------------------
 # Filters
-#-------------------------
-with st.container():
-    col1, col2, col3 = st.columns([2,1,1])
-    search = col1.text_input("🔍 Search updates...", placeholder="e.g. oncology, GMP, vaccine")
-    region_filter = col2.multiselect("🌍 Region", ["US", "EU", "UK"], default=[])
-    impact_filter = col3.multiselect("⚠ Impact Level", ["High", "Medium", "Low"], default=[])
+# -------------------------
+col1, col2, col3 = st.columns([2, 1, 1])
+search = col1.text_input("🔍 Search updates...")
+region_filter = col2.multiselect("🌍 Region", ["US", "EU", "UK"])
+impact_filter = col3.multiselect("⚠ Impact Level", ["High", "Medium", "Low"])
 
-# Filter logic
 filtered = []
+
 for item in data:
-    if search and search.lower() not in item["title"].lower() and search.lower() not in item["summary"].lower():
+    if search and search.lower() not in item["title"].lower():
         continue
     if region_filter and item["region"] not in region_filter:
         continue
@@ -66,60 +64,50 @@ for item in data:
         continue
     filtered.append(item)
 
-st.write("")  
+st.write("")
 
-#-------------------------
+# -------------------------
 # Card Renderer
-#-------------------------
+# -------------------------
 def render_card(item):
-    with st.container():
-        st.markdown(f"""
-        <div style="
-            border:1px solid #d3d3d3;
-            padding:18px;
-            border-radius:10px;
-            margin-bottom:15px;
-            background:#fafafa;">
-            
-            <div style="display:flex; justify-content:space-between;">
-                <strong style="font-size:18px;">{item['title']}</strong>
-                <span style="font-size:14px; color:gray;">{item['date']}</span>
-            </div>
+    card_html = f"""
+    <div style="
+        border:1px solid #ddd;
+        border-radius:12px;
+        padding:18px;
+        margin-bottom:18px;
+        background:white;
+        box-shadow:0px 2px 5px rgba(0,0,0,0.05);">
 
-            <p style="margin-top:6px; font-size:15px;">{item['summary']}</p>
+        <h4 style="margin:0; font-size:18px;">{item['title']}</h4>
+        <p style="color:gray; font-size:13px;">{item['date']} • {item['agency']} • {item['region']}</p>
 
-            <div style="margin-top:10px;">
-                <span style="background:#eef;padding:4px 8px;border-radius:6px;margin-right:6px;">
-                    {item['agency']}
-                </span>
-                <span style="background:#efe;padding:4px 8px;border-radius:6px;margin-right:6px;">
-                    Region: {item['region']}
-                </span>
-                <span style="background:#fee;padding:4px 8px;border-radius:6px;margin-right:6px;">
-                    Impact: {item['impact']}
-                </span>
-                <span style="background:#f0f0f0;padding:4px 8px;border-radius:6px;margin-right:6px;">
-                    Score: {item['score']}
-                </span>
-            </div>
+        <p style="font-size:15px; margin-top:8px;">{item['summary']}</p>
+
+        <div style="margin-top:10px;">
+            <span style="background:#ffe5e5; padding:6px; border-radius:6px; margin-right:8px;">
+                Impact: {item['impact']}
+            </span>
+            <span style="background:#e7f3ff; padding:6px; border-radius:6px; margin-right:8px;">
+                Score: {item['score']}
+            </span>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """
 
-        if st.button(f"🧠 Show AI Summary ({item['agency']})", key=item['title']):
-            st.info(f"LLM Summary:\n\nThis regulation is likely to impact compliance reporting requirements and operational workflows.")
+    st.markdown(card_html, unsafe_allow_html=True)
 
-# Render filtered cards
+    if st.button(f"🔍 View AI Summary ({item['agency']})", key=item['title']):
+        st.success("AI Summary: Placeholder text summarizing impact and compliance context.")
+
+
+# Render cards
 if not filtered:
-    st.warning("No matching results. Try adjusting filters.")
+    st.warning("No results found. Try different filters.")
 else:
     for item in filtered:
         render_card(item)
 
-# Optional bottom assistant
 st.markdown("---")
-st.subheader("💬 Ask the Intelligence Assistant")
-user_query = st.text_input("Ask a question like: 'Show high-risk oncology alerts in the last month'")
-
-if st.button("Generate Insight"):
-    st.success("✨ AI Response Placeholder:\n\nBased on current data, FDA and EMA issued 2 significant oncology guidance changes impacting post-market safety compliance.")
+st.caption("Prototype UI — Regulatory Intelligence System — v0.1")
 
